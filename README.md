@@ -6,8 +6,8 @@ Modelado de amenazas de **EventosU**, un sitio web ficticio en fase de diseño d
 
 | Nombre | Carné | GitHub |
 |---|---|---|
-| _Nombre completo_ | _carné_ | [@ChristianSosa22](https://github.com/ChristianSosa22) |
-| _Nombre completo_ | _carné_ | _usuario_ |
+| Christian Sosa | 22000102 | [@ChristianSosa22](https://github.com/ChristianSosa22) |
+| Pablo Siquinajay | 2200647 | [@Pablokill2004](https://github.com/Pablokill2004) |
 
 ## Alcance
 
@@ -15,7 +15,7 @@ Modelado de amenazas de **EventosU**, un sitio web ficticio en fase de diseño d
 
 **Fuera del modelo:** la seguridad interna de los tres servicios de terceros, los datos de tarjeta (los procesa la pasarela), la infraestructura del proveedor de nube, los dispositivos personales de los usuarios y la seguridad física del recinto.
 
-El detalle, los activos y los supuestos están en la sección 2 del [informe](docs/informe.md).
+El detalle, los activos y los supuestos están en la sección 2 del [informe](docs/informe.pdf).
 
 ## Estructura
 
@@ -24,8 +24,8 @@ eventosu-threat-model/
 ├── README.md             # integrantes, alcance y cómo abrir el modelo
 ├── model/eventosu.json   # modelo de Threat Dragon (DFD nivel 0 y nivel 1, 23 amenazas)
 ├── assets/               # capturas de los diagramas de Threat Dragon
-├── docs/informe.md       # informe en borrador; se exporta a docs/informe.pdf al finalizar
-└── docs/amenazas.csv     # tabla de amenazas
+├── docs/informe.pdf      # informe final
+└── docs/amenazas.csv     # tabla de amenazas con priorización, respuesta y estado
 ```
 
 ## Cómo abrir el modelo

@@ -2,12 +2,19 @@
   "version": "2.0",
   "summary": {
     "title": "EventosU",
-    "owner": "",
-    "description": "Modelo de amenazas de EventosU, sitio web universitario de inscripción y pago de eventos con entrada QR. Sistema en fase de diseño; ver docs/informe.md para alcance, activos y supuestos.",
+    "owner": "Christian Sosa",
+    "description": "Modelo de amenazas de EventosU, sitio web universitario de inscripción y pago de eventos con entrada QR. Sistema en fase de diseño; ver docs/informe.pdf para alcance, activos y supuestos.",
     "id": 0
   },
   "detail": {
-    "contributors": [],
+    "contributors": [
+      {
+        "name": "Christian Sosa"
+      },
+      {
+        "name": "Pablo Siquinajay"
+      }
+    ],
     "diagrams": [
       {
         "id": 0,
@@ -1279,14 +1286,14 @@
                   "id": "9616edab-735d-581b-9b79-e32accf3274b",
                   "title": "T17 XSS que roba el JWT de localStorage",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "High",
                   "type": "Information disclosure",
                   "description": "Un organizador malicioso escribe un <script> en la descripción de su evento. El sitio la muestra sin escapar y el script se ejecuta en el navegador de cada persona que abre el evento, lee el JWT de localStorage y lo envía al atacante. Como /admin es el mismo sitio, si un administrador abre el evento el atacante obtiene un token de administrador.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Escapar la descripción al renderizar (sin dangerouslySetInnerHTML), CSP estricta y token en cookie HttpOnly + SameSite.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 17,
-                  "score": ""
+                  "score": "Alto x Media = Alto"
                 }
               ],
               "handlesCardPayment": false,
@@ -1331,27 +1338,27 @@
                   "id": "ad779c2b-18af-5632-98c1-7e7db027d0e6",
                   "title": "T13 Cambios de rol sin registro",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "Low",
                   "type": "Repudiation",
                   "description": "Un administrador le asigna rol de organizador a un cómplice, este exporta la lista de inscritos y el administrador le quita el rol. Como los cambios de rol no dejan registro, el administrador niega haberlo hecho y no hay evidencia para contradecirlo.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Registrar en logs inmutables todo cambio de rol (quién, a quién, cuándo, valor anterior y nuevo).",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 13,
-                  "score": ""
+                  "score": "Medio x Baja = Bajo"
                 },
                 {
                   "id": "96991a86-c424-5d29-ae88-ac906f085b02",
                   "title": "T21 Endpoints de /admin sin verificación de rol",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "Critical",
                   "type": "Elevation of privilege",
                   "description": "Un estudiante con sesión normal escribe /admin en la barra de direcciones. El sitio oculta el menú de administración solo en el navegador y los endpoints de administración únicamente verifican que el JWT sea válido, no el rol. El estudiante llama al endpoint de roles y se asigna el rol de administrador.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Autorización por rol en el servidor (middleware) en todos los endpoints /admin; validar el claim de rol contra lista blanca.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 21,
-                  "score": ""
+                  "score": "Alto x Alta = Crítico"
                 }
               ],
               "handlesCardPayment": false,
@@ -1396,27 +1403,27 @@
                   "id": "84a6d331-986f-5262-9d74-d39660d826b7",
                   "title": "T12 Validaciones sin responsable identificable",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "Low",
                   "type": "Repudiation",
                   "description": "Todo el personal de puerta comparte un mismo usuario genérico en la app. Un miembro del personal escanea por adelantado las entradas de sus conocidos o deja pasar gente sin escanear. Cuando un asistente reclama que su entrada aparece \"ya usada\", no se puede saber quién la validó, en qué puerta ni con qué teléfono, y el responsable lo niega.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Aceptar] Riesgo aceptado (ver 6.5). Control mínimo: registrar fecha, hora y dispositivo de cada validación.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 12,
-                  "score": ""
+                  "score": "Medio x Baja = Bajo"
                 },
                 {
                   "id": "ead1915a-2a30-5c79-8334-254fcb50f27e",
                   "title": "T23 Llave de API fija extraída de la app",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "High",
                   "type": "Elevation of privilege",
                   "description": "Un atacante descarga la App de Puerta, la descompila y encuentra una llave de API fija, compartida por todos los dispositivos. Con ella llama directamente a la API desde su computadora y marca como usada o disponible cualquier entrada, sin ser personal de puerta.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Autenticar cada dispositivo con credenciales propias y token corto; no embeber llaves fijas en la app.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 23,
-                  "score": ""
+                  "score": "Alto x Media = Alto"
                 }
               ],
               "handlesCardPayment": false,
@@ -1461,105 +1468,105 @@
                   "id": "b0c8f071-31be-54c4-aca3-cdd7c5b33dd0",
                   "title": "T02 Robo del código de autorización OAuth",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "High",
                   "type": "Spoofing",
                   "description": "Un atacante envía a un organizador un enlace de \"iniciar sesión con tu cuenta institucional\" en el que cambió el redirect_uri por un dominio suyo. Si el registro de la aplicación en Entra ID acepta comodines, o la API no valida state ni usa PKCE, el atacante recibe el código de autorización, lo canjea y obtiene una sesión de organizador con acceso a las listas de inscritos.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Lista blanca exacta de redirect_uri en Entra ID (sin comodines), validar state y usar PKCE con S256.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 2,
-                  "score": ""
+                  "score": "Alto x Media = Alto"
                 },
                 {
                   "id": "f1ee4cbc-a66c-58a8-aff9-ffd0a33cb678",
                   "title": "T03 Relleno de credenciales en el login",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "High",
                   "type": "Spoofing",
                   "description": "Un atacante prueba contra el endpoint de login miles de pares correo y contraseña filtrados de otros sitios. El diseño no limita intentos ni exige segundo factor al público externo, así que entra a las cuentas que reutilizan contraseña y descarga sus entradas QR.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Rate limiting por IP y cuenta en el login (5 intentos y bloqueo progresivo), MFA para roles elevados y verificación contra listas de contraseñas filtradas.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 3,
-                  "score": ""
+                  "score": "Medio x Alta = Alto"
                 },
                 {
                   "id": "ab0553db-53a1-5679-9332-9d63880bea07",
                   "title": "T04 Enlace de restablecimiento envenenado",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "Medium",
                   "type": "Spoofing",
                   "description": "Un atacante pide restablecer la contraseña de una víctima y altera la cabecera Host de la petición. La API arma el enlace con ese valor, el servicio de correo lo entrega a la víctima y, cuando ella hace clic, el token de restablecimiento llega al servidor del atacante, que toma la cuenta.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Construir el enlace de restablecimiento con un dominio fijo configurado en el servidor, nunca desde la cabecera Host.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 4,
-                  "score": ""
+                  "score": "Medio x Media = Medio"
                 },
                 {
                   "id": "9cbeeefd-e75a-5530-af71-a1bd317a623d",
                   "title": "T05 QR con número de inscripción predecible",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "High",
                   "type": "Spoofing",
                   "description": "Un asistente con una entrada legítima decodifica su QR y ve que solo contiene el número de inscripción 1042. Genera con cualquier app un QR con 1041, llega temprano y la API responde \"válido\": entra con la entrada de otra persona, que al llegar recibe \"ya usado\".",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Firmar el QR con un token HMAC/JWT de expiración corta en lugar del ID secuencial; la API valida la firma.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 5,
-                  "score": ""
+                  "score": "Medio x Alta = Alto"
                 },
                 {
                   "id": "44338c80-ba47-5f2d-895f-fa4d4e3d00bd",
                   "title": "T11 Doble uso de un QR por condición de carrera",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "Low",
                   "type": "Tampering",
                   "description": "Dos amigos comparten la captura de pantalla de un solo QR y lo presentan al mismo tiempo en dos puertas. La API consulta el estado y después lo actualiza en dos pasos separados; ambas peticiones leen \"no usado\" y las dos puertas reciben \"válido\". Entran dos personas con una entrada.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Marcar la entrada como usada con una operación atómica (UPDATE ... WHERE estado = no_usado RETURNING).",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 11,
-                  "score": ""
+                  "score": "Bajo x Media = Bajo"
                 },
                 {
                   "id": "5fb95077-0b72-5cb9-b1a0-b69c3fb1dcdd",
                   "title": "T16 Exportación de inscritos de un evento ajeno",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "High",
                   "type": "Information disclosure",
                   "description": "El organizador del evento 87 cambia el identificador en la URL de exportación por 88. La API comprueba que tiene rol de organizador pero no que el evento sea suyo, y le entrega los datos personales de los inscritos de un evento ajeno.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Verificar propiedad del evento en la consulta (WHERE evento_id = X AND organizador_id = sesion.uid).",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 16,
-                  "score": ""
+                  "score": "Alto x Media = Alto"
                 },
                 {
                   "id": "54ef93c3-f02f-55d6-a0cc-3e943f39fe9e",
                   "title": "T19 Acaparamiento de cupos sin pago",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "Critical",
                   "type": "Denial of service",
                   "description": "Un revendedor ejecuta un script el minuto en que abre la inscripción de un concierto y crea miles de inscripciones sin pagarlas. Cada una reserva un cupo sin fecha de vencimiento, el evento aparece agotado y los estudiantes reales no pueden inscribirse.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Expirar inscripciones no pagadas (15 min) con un job que libera el cupo y limitar pendientes por usuario e IP.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 19,
-                  "score": ""
+                  "score": "Alto x Alta = Crítico"
                 },
                 {
                   "id": "681d44c5-f647-5231-9a23-f2a656a9e4db",
                   "title": "T22 JWT forjado con rol de administrador",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "High",
                   "type": "Elevation of privilege",
                   "description": "Un usuario registrado decodifica su JWT, cambia el claim de rol a admin y lo firma de nuevo: adivina una clave HS256 débil con un diccionario, o envía el token con alg: none y la API lo acepta. Obtiene control total de usuarios, eventos y exportaciones.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Firmar el JWT con RS256 (clave en KMS), permitir solo RS256/ES256, rechazar alg:none y rotar claves.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 22,
-                  "score": ""
+                  "score": "Alto x Media = Alto"
                 }
               ],
               "handlesCardPayment": false,
@@ -1639,14 +1646,14 @@
                   "id": "7660693e-d73c-5f76-bd5d-9f3d84eeae18",
                   "title": "T01 Webhook de pago falsificado",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "Critical",
                   "type": "Spoofing",
                   "description": "Un estudiante que crea una inscripción y deja el pago pendiente encuentra la URL del webhook (la ruta es predecible y aparece en la documentación pública de la pasarela). Envía con curl un JSON \"pago aprobado\" con su número de inscripción. La API no comprueba que el mensaje venga de la pasarela, marca la inscripción como pagada y le envía el QR por correo: obtiene una entrada sin pagar.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Verificar la firma HMAC-SHA256 del webhook con el secreto de la pasarela (gestor de secretos); descartar mensajes sin firma o con timestamp mayor a 5 min e ignorar notificaciones duplicadas.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 1,
-                  "score": ""
+                  "score": "Alto x Alta = Crítico"
                 }
               ],
               "providesAuthentication": false
@@ -1728,14 +1735,14 @@
                   "id": "fec74eaa-b680-5422-8c4b-19a30b55110a",
                   "title": "T09 Inyección SQL desde el buscador",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "High",
                   "type": "Tampering",
                   "description": "Un visitante sin cuenta escribe SQL en el buscador del catálogo. La API concatena el texto en la consulta, y el atacante ejecuta un UPDATE que pone en \"pagada\" su inscripción o cambia el cupo de un evento.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Consultas parametrizadas u ORM en toda interacción con PostgreSQL; prohibir concatenación de entrada en SQL (SAST + revisión).",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 9,
-                  "score": ""
+                  "score": "Alto x Media = Alto"
                 }
               ],
               "isALog": false,
@@ -1786,14 +1793,14 @@
                   "id": "4d687dc5-408a-5468-9477-292a894b0cb7",
                   "title": "T08 Sobrescritura del afiche de otro evento",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "Medium",
                   "type": "Tampering",
                   "description": "Un organizador, o alguien con su cuenta, sube un afiche y controla el nombre del objeto en la petición. Usa la ruta del afiche de otro evento y lo sobrescribe con una imagen que anuncia un cambio de sede falso y un QR de \"pago\" que lleva a una cuenta suya. Los visitantes ven el afiche falso con la marca de la universidad.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Nombre de objeto generado en el servidor (UUID), ACL de escritura solo para el organizador propietario, validar MIME/tamaño y versionado.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 8,
-                  "score": ""
+                  "score": "Medio x Media = Medio"
                 }
               ],
               "isALog": false,
@@ -1844,14 +1851,14 @@
                   "id": "b9e77944-a238-5767-9df6-323d3373945e",
                   "title": "T14 Borrado de registros de auditoría",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "Low",
                   "type": "Repudiation",
                   "description": "Un atacante que ya comprometió la API usa la misma credencial con la que el contenedor escribe logs, que también permite borrar, y elimina las entradas de sus exportaciones de CSV. La universidad no puede determinar qué datos salieron ni notificar a los afectados.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Escritura de logs con identidad de solo-append separada de la lectura y almacén inmutable (object lock).",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 14,
-                  "score": ""
+                  "score": "Medio x Baja = Bajo"
                 }
               ],
               "isALog": true,
@@ -2157,27 +2164,27 @@
                   "id": "f8a0fb1a-1df1-5989-bb92-fa0f7d59a00b",
                   "title": "T06 Precio manipulado en la inscripción",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "Critical",
                   "type": "Tampering",
                   "description": "Un usuario intercepta con un proxy la petición de inscripción que sale de su navegador y cambia el campo de precio de 500 a 1. La API confía en el monto que envía el cliente al crear la orden en la pasarela; el usuario paga 1 y recibe una entrada de 500.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Calcular el precio en el servidor (base de datos) y nunca usar el monto del cliente; validar monto y evento en el webhook contra la orden.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 6,
-                  "score": ""
+                  "score": "Alto x Alta = Crítico"
                 },
                 {
                   "id": "4ef66f04-dfd3-501d-9b72-5f2414b973a0",
                   "title": "T10 Inyección de fórmulas en el CSV",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "Medium",
                   "type": "Tampering",
                   "description": "Una persona se registra con el nombre =HYPERLINK(\"http://sitio-falso/login\";\"Ver detalle\"). La API guarda el texto tal cual y lo escribe en el CSV. Cuando el organizador abre el archivo en Excel, la celda se interpreta como fórmula y lo lleva a una página que le pide sus credenciales institucionales.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Al exportar CSV, prefijar con comilla simple (') los campos que empiecen por =, +, -, @ o tabulador.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 10,
-                  "score": ""
+                  "score": "Medio x Media = Medio"
                 }
               ]
             },
@@ -2288,27 +2295,27 @@
                   "id": "0b569ce3-f4a6-5a60-9acf-251c4961374c",
                   "title": "T18 Datos personales de más en la validación",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "Medium",
                   "type": "Information disclosure",
                   "description": "La respuesta de validación devuelve el registro completo de la inscripción (nombre, correo, carné, teléfono) aunque la app solo necesita \"válido\" o \"ya usado\". Alguien del personal de puerta, o quien encuentre un teléfono de puerta desbloqueado, envía números de inscripción consecutivos y recolecta los datos personales de todos los asistentes.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Devolver solo {valido, motivo} en la validación; nunca el registro completo.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 18,
-                  "score": ""
+                  "score": "Medio x Media = Medio"
                 },
                 {
                   "id": "db20bfe2-6dd3-5627-b98c-1b0ea9037ef9",
                   "title": "T20 Validación caída durante el ingreso",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "High",
                   "type": "Denial of service",
                   "description": "Media hora antes de un concierto, un atacante inunda de peticiones el endpoint de validación, que no limita la tasa, o la red wifi del recinto se satura. Como la app no tiene modo sin conexión, el personal no puede validar ninguna entrada: se forma una cola de cientos de personas o se decide dejar pasar sin escanear.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Rate limiting en el endpoint de validación y modo sin conexión de la app con cola local que sincroniza.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 20,
-                  "score": ""
+                  "score": "Alto x Media = Alto"
                 }
               ]
             },
@@ -2595,14 +2602,14 @@
                   "id": "21cd47fd-3410-5f9e-bd2a-c6af23e71b2a",
                   "title": "T07 Referencia o monto alterado en el webhook",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "High",
                   "type": "Tampering",
                   "description": "Un usuario crea dos inscripciones: una a un taller de 10 y otra a un concierto de 500. Paga la barata y reenvía la notificación cambiando la referencia por la de la inscripción cara. La API solo revisa que el estado sea \"pagado\" y no compara monto ni orden contra lo que ella misma creó, así que marca como pagado el concierto.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Mitigar] Validar en el webhook que referencia, monto y evento coincidan con la orden creada por la API.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 7,
-                  "score": ""
+                  "score": "Alto x Media = Alto"
                 }
               ]
             },
@@ -2897,14 +2904,14 @@
                   "id": "38af9aa5-a367-5781-a203-fee841115178",
                   "title": "T15 CSV de inscritos en bucket público",
                   "status": "Open",
-                  "severity": "TBD",
+                  "severity": "Critical",
                   "type": "Information disclosure",
                   "description": "El CSV de inscritos se guarda en el mismo bucket de lectura pública que los afiches, con un nombre predecible como export-evento-87.csv. Cualquier persona en internet prueba números de evento en la URL y descarga nombre, correo, carné y teléfono de todos los inscritos, sin iniciar sesión.",
-                  "mitigation": "Pendiente: se define en la actividad 6.",
+                  "mitigation": "[Eliminar] Eliminar el CSV del bucket público: bucket privado y entrega por URL firmada de corta duración o endpoint autenticado.",
                   "modelType": "STRIDE",
                   "new": false,
                   "number": 15,
-                  "score": ""
+                  "score": "Alto x Alta = Crítico"
                 }
               ]
             },
