@@ -1,0 +1,8 @@
+# Enunciado de la tarea (material del curso, no es parte de la entrega)
+Tarea_Modelado_de_amenazas_de_un_sitio_web.md
+
+# Archivos del sistema y del editor
+.DS_Store
+Thumbs.db
+.vscode/
+.claude/
