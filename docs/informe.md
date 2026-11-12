@@ -1,6 +1,6 @@
 # Modelado de amenazas de EventosU
 
-> **Estado del documento:** borrador de trabajo en Markdown. Cubre las actividades 1 a 4. Las actividades 5 (priorización) y 6 (respuesta y trazabilidad) están pendientes; al completarlas este archivo se exporta a `docs/informe.pdf`.
+> **Estado del documento:** borrador de trabajo en Markdown. Cubre las actividades 1 a 6 (alcance, DFD, STRIDE, árbol de ataque, priorización y respuesta/trazabilidad). Faltan las capturas del DFD de Threat Dragon; al cerrarlas se exporta a `docs/informe.pdf`.
 
 ## 1. Portada e integrantes
 
@@ -201,7 +201,7 @@ flowchart LR
 
 Flujos obligatorios: **webhook de pago** (T01, T07), **validación del QR** (T05, T11, T12, T18, T20, T23) y **exportación del CSV** (T10, T15, T16).
 
-Las columnas impacto, probabilidad, riesgo, respuesta, mitigación y estado se completan en las actividades 5 y 6; en [`amenazas.csv`](amenazas.csv) ya existen con el valor "Pendiente".
+La identificación (ID, elemento, STRIDE, escenario y flujo) está en esta tabla. La priorización (impacto, probabilidad, riesgo y justificación) y la respuesta (estrategia y mitigación) están en la sección 6. La tabla completa, con todas las columnas, vive en [`amenazas.csv`](amenazas.csv).
 
 <!-- TABLA_AMENAZAS:INICIO -->
 | ID | Elemento | STRIDE | Escenario | Flujo que cruza límite |
@@ -309,12 +309,85 @@ El segundo camino más barato es 4.1 con T21 (endpoints de `/admin` sin verifica
 
 ## 6. Matriz de riesgo
 
-_Pendiente: actividad 5._
+La priorización usa una matriz de **impacto × probabilidad** de 3×3. Primero se califica cada amenaza en impacto y probabilidad con los criterios de abajo, aterrizados a EventosU; el cruce de ambos da el **riesgo** (Bajo, Medio, Alto o Crítico).
+
+### 6.1 Criterios de impacto
+
+| Nivel | Cuándo aplica en EventosU |
+|---|---|
+| **Alto** | Pérdida económica directa y repetible (entradas gratis o con precio manipulado a escala), fuga masiva de datos personales (nombre, correo, carné, teléfono de muchos inscritos) o indisponibilidad total de la validación el día del evento. Daño reputacional serio para la universidad. |
+| **Medio** | Fraude acotado (una o pocas entradas), fuga limitada de datos (un usuario o un evento) o degradación parcial del servicio. Recuperable con costo moderado. |
+| **Bajo** | Afecta un registro o una entrada, sin fuga de datos personales a gran escala y recuperable sin costo relevante. |
+
+### 6.2 Criterios de probabilidad
+
+| Nivel | Cuándo aplica en EventosU |
+|---|---|
+| **Alta** | El atacante solo necesita herramientas básicas (`curl`, un proxy, el navegador) y ningún privilegio previo; el control ausente es evidente y el ataque es repetible sin barreras. |
+| **Media** | Requiere un paso adicional (adivinar una URL, tener una cuenta, conocer la documentación, llegar antes que otro) o cierto contexto técnico u operativo. |
+| **Baja** | Requiere técnica avanzada, un privilegio o cómplice interno, o depende de factores fuera del control del atacante (por ejemplo, que una víctima concreta haga clic). |
+
+### 6.3 Matriz 3×3 y escala de riesgo
+
+| Impacto \ Probabilidad | Baja | Media | Alta |
+|---|---|---|---|
+| **Alto** | Medio | Alto | **Crítico** |
+| **Medio** | Bajo | Medio | Alto |
+| **Bajo** | Bajo | Bajo | Medio |
+
+- **Crítico:** impacto alto + probabilidad alta. Es lo primero que hay que resolver antes de escribir código.
+- **Alto:** impacto alto con probabilidad media, o impacto medio con probabilidad alta.
+- **Medio / Bajo:** se resuelven después o se aceptan según el costo de mitigar.
+
+### 6.4 Priorización y respuesta de las 23 amenazas
+
+La identificación (escenario y flujo) está en la sección 4. Esta tabla añade impacto, probabilidad, riesgo y la respuesta elegida; la justificación resume en una línea el porqué de cada calificación.
+
+| ID | Impacto | Probabilidad | Riesgo | Justificación | Respuesta | Mitigación |
+|---|---|---|---|---|---|---|
+| T01 | Alto | Alta | Crítico | Entradas gratis a escala y reventa; solo `curl` y URL predecible, sin firma. | Mitigar | Verificar la firma HMAC-SHA256 del webhook con el secreto de la pasarela (gestor de secretos); descartar mensajes sin firma o con timestamp mayor a 5 min e ignorar notificaciones duplicadas. |
+| T02 | Alto | Media | Alto | Sesión de organizador y listas de inscritos; requiere phishing a un organizador y configuración débil. | Mitigar | Lista blanca exacta de `redirect_uri` en Entra ID (sin comodines), validar `state` y usar PKCE con S256. |
+| T03 | Medio | Alta | Alto | Cuentas individuales; el relleno de credenciales es masivo y automatizable. | Mitigar | Rate limiting por IP y cuenta en el login (5 intentos y bloqueo progresivo), MFA para roles elevados y verificación contra listas de contraseñas filtradas. |
+| T04 | Medio | Media | Medio | Una cuenta a la vez; requiere envenenar `Host` y que la víctima haga clic. | Mitigar | Construir el enlace de restablecimiento con un dominio fijo configurado en el servidor, nunca desde la cabecera `Host`. |
+| T05 | Medio | Alta | Alto | Una entrada por fraude; decodificar y regenerar un QR es trivial. | Mitigar | Firmar el QR con un token HMAC/JWT de expiración corta en lugar del ID secuencial; la API valida la firma. |
+| T06 | Alto | Alta | Crítico | Pérdida de ingresos repetible; cambiar un campo con un proxy no requiere técnica. | Mitigar | Calcular el precio en el servidor (base de datos) y nunca usar el monto del cliente; validar monto y evento en el webhook contra la orden. |
+| T07 | Alto | Media | Alto | Paga lo barato y recibe lo caro; requiere dos inscripciones y manipular la referencia. | Mitigar | Validar en el webhook que referencia, monto y evento coincidan con la orden creada por la API. |
+| T08 | Medio | Media | Medio | Daño reputacional, no económico directo; requiere cuenta de organizador. | Mitigar | Nombre de objeto generado en el servidor (UUID), ACL de escritura solo para el organizador propietario, validar MIME/tamaño y versionado. |
+| T09 | Alto | Media | Alto | Control total de la base de datos; requiere que exista concatenación y sea alcanzable. | Mitigar | Consultas parametrizadas u ORM en toda interacción con PostgreSQL; prohibir concatenación de entrada en SQL (SAST + revisión). |
+| T10 | Medio | Media | Medio | Phishing dirigido al organizador; depende de abrir el CSV en Excel y hacer clic. | Mitigar | Al exportar CSV, prefijar con comilla simple (`'`) los campos que empiecen por `=`, `+`, `-`, `@` o tabulador. |
+| T11 | Bajo | Media | Bajo | Una entrada extra por entrada pagada; requiere sincronizar dos puertas a la vez. | Mitigar | Marcar la entrada como usada con una operación atómica (`UPDATE ... WHERE estado = no_usado RETURNING`). |
+| T12 | Medio | Baja | Bajo | Fraude limitado y sin rastro; requiere conducta indebida de personal propio. | Aceptar | Riesgo aceptado por el Coordinador de EventosU; control mínimo: registrar timestamp y dispositivo de cada validación. |
+| T13 | Medio | Baja | Bajo | Pérdida de rendición de cuentas; requiere un administrador malicioso y un cómplice. | Mitigar | Registrar en logs inmutables todo cambio de rol (quién, a quién, cuándo, valor anterior y nuevo). |
+| T14 | Medio | Baja | Bajo | Agrava un incidente ya ocurrido; requiere haber comprometido la API antes. | Mitigar | Escritura de logs con identidad de solo-append separada de la lectura y almacén inmutable (object lock). |
+| T15 | Alto | Alta | Crítico | Fuga masiva de datos personales; nombre predecible en bucket público, sin login. | Eliminar | Eliminar el CSV del bucket público: bucket privado y entrega por URL firmada de corta duración o endpoint autenticado. |
+| T16 | Alto | Media | Alto | Expone PII de un evento ajeno; requiere cuenta de organizador. | Mitigar | Verificar propiedad del evento en la consulta (`WHERE evento_id = X AND organizador_id = sesion.uid`). |
+| T17 | Alto | Media | Alto | Robo de token, incluido el de administrador; requiere inyectar script y que una víctima abra el evento. | Mitigar | Escapar la descripción al renderizar (sin `dangerouslySetInnerHTML`), CSP estricta y token en cookie HttpOnly + SameSite. |
+| T18 | Medio | Media | Medio | Fuga de PII limitada; requiere acceso a un teléfono de puerta. | Mitigar | Devolver solo `{valido, motivo}` en la validación; nunca el registro completo. |
+| T19 | Alto | Alta | Crítico | Evento agotado sin ventas; script trivial que reserva cupos sin pagar. | Mitigar | Expirar inscripciones no pagadas (15 min) con un job que libera el cupo y limitar pendientes por usuario e IP. |
+| T20 | Alto | Media | Alto | Indisponibilidad en el peor momento; requiere inundar el endpoint o saturar la red. | Mitigar | Rate limiting en el endpoint de validación y modo sin conexión de la app con cola local que sincroniza. |
+| T21 | Alto | Alta | Crítico | Control total del sistema; solo llamar endpoints que no validan rol. | Mitigar | Autorización por rol en el servidor (middleware) en todos los endpoints `/admin`; validar el claim de rol contra lista blanca. |
+| T22 | Alto | Media | Alto | Control total; requiere forjar o adivinar la clave de firma. | Mitigar | Firmar el JWT con RS256 (clave en KMS), permitir solo RS256/ES256, rechazar `alg:none` y rotar claves. |
+| T23 | Alto | Media | Alto | Manipular cualquier entrada; requiere descompilar la app y extraer la llave. | Mitigar | Autenticar cada dispositivo con credenciales propias y token corto; no embeker llaves fijas. |
 
 ## 7. Trazabilidad de las 5 amenazas críticas
 
-_Pendiente: actividad 6._
+Las cinco amenazas de mayor riesgo (Crítico) se trazan a un requisito de OWASP ASVS 4.0.3, a una tarea con criterio de aceptación y al control que la verifica en el pipeline antes de producción.
+
+| Amenaza | Requisito ASVS | Historia de usuario / tarea (con criterio de aceptación) | Verificación en el pipeline |
+|---|---|---|---|
+| **T01** — Falsificar el webhook de pago | **V13.2.6** — «Verify that the message headers and payload are trustworthy and not modified in transit… per-message digital signatures…» (el secreto se gestiona según **V2.10.4**). | **Como API**, al recibir un webhook solo marco una inscripción como pagada si la firma HMAC coincide y el timestamp es reciente. **Criterio:** un webhook sin firma o con firma inválida responde `401` y no cambia el estado; un webhook firmado válido actualiza solo la inscripción referenciada. | **Prueba manual / test de integración en CI** (SAST no cubre lógica de integración): enviar con `curl` un webhook sin firma → `401`; con firma válida → `200`. |
+| **T06** — Alterar el precio en la inscripción | **V11.1.5** — «Verify the application has business logic limits or validation to protect against likely business risks or threats, identified using threat modeling…». | **Como API**, calculo el precio desde mi base de datos y lo envío a la pasarela; ignoro cualquier monto que venga del cliente. **Criterio:** si un cliente altera el campo precio con un proxy, la orden enviada a la pasarela conserva el precio oficial del evento. | **Prueba manual / test unitario de negocio en CI**: modificar el precio con un proxy y verificar que la orden conserva el precio oficial (SAST no detecta lógica de negocio). |
+| **T15** — CSV de inscritos en bucket público | **V4.2.1** — «Verify that sensitive data and APIs are protected against Insecure Direct Object Reference (IDOR) attacks… viewing everyone's records…» (el almacenamiento se endurece con **V12.4.1**). | **Como usuario sin sesión**, no puedo descargar el CSV; solo el organizador propietario lo obtiene por URL firmada de corta duración. **Criterio:** al pedir `export-evento-87.csv` por URL pública el objeto no existe en el bucket público y la descarga exige sesión y propiedad del evento. | **IaC** (escaneo de la política del bucket con `checkov`/`tfsec`: sin permisos públicos) + **DAST** (intentar descargar el objeto sin sesión). |
+| **T19** — Acaparar cupos sin pagar | **V11.1.4** — «Verify that the application has anti-automation controls to protect against excessive calls such as mass data exfiltration, business logic requests, file uploads or denial of service» (límites por usuario en **V11.1.3**). | **Como sistema**, expiro inscripciones sin pagar a los 15 minutos, libero el cupo y limito inscripciones pendientes por usuario e IP. **Criterio:** un script que crea 1000 inscripciones sin pagar es limitado por usuario/IP y los cupos se liberan al vencer el plazo. | **Prueba manual / test de carga de negocio en CI** (simular una ráfaga de inscripciones sin pago) + **DAST** para verificar el rate limiting. |
+| **T21** — `/admin` sin verificación de rol | **V4.1.1** — «Verify that the application enforces access control rules on a trusted service layer, especially if client-side access control is present and could be bypassed» (menor privilegio en **V4.1.3**). | **Como API**, verifico el rol en el servidor en todos los endpoints `/admin`, no solo que el JWT sea válido. **Criterio:** un JWT válido con rol estudiante recibe `403` en cualquier endpoint `/admin` y no modifica roles ni datos. | **DAST** (prueba de control de acceso: token de estudiante contra endpoints `/admin` → `403`) + **SAST** (verificar que todos los endpoints `/admin` usan el middleware de autorización). |
 
 ## 8. Conclusiones
 
-_Pendiente: se redactan al terminar las actividades 5 y 6._
+El análisis muestra que el riesgo de EventosU se concentra en cuatro decisiones de diseño, todas corregibles **antes de escribir una línea de código**:
+
+1. **Separar `/admin` del sitio público y verificar el rol en el servidor.** El panel no puede compartir el mismo login ni confiar en "ocultar el menú" en el navegador (T21); la autorización por rol debe vivir en la API (V4.1.1) y los administradores deben usar MFA (V4.3.1).
+2. **Firmar el QR y validarlo de forma atómica.** El QR no puede ser un ID secuencial (T05): debe ser un token firmado (JWT/HMAC) de corta vida, y el marcado de "usado" debe ser una sola operación atómica para evitar el doble uso (T11).
+3. **Verificar la firma del webhook y calcular el precio solo en el servidor.** Cierran de un golpe las tres formas más baratas de entrar gratis: webhook falso (T01), precio manipulado (T06) y referencia cambiada (T07). La firma HMAC del webhook es el control con mejor relación costo-beneficio de todo el modelo.
+4. **Sacar los CSV del bucket público y expirar las inscripciones impagas.** Los datos personales nunca deben quedar en un objeto de lectura pública con nombre predecible (T15); los cupos no pagados deben liberarse solos para que un script no "agote" el evento (T19).
+
+Con esos cuatro cambios se eliminan las cinco amenazas críticas y la mayoría de las de riesgo alto. El resto son controles puntuales (firma del JWT con RS256, consultas parametrizadas, validación de MIME/tamaño en afiches, rate limiting) que se aplican como historias técnicas en el primer sprint.

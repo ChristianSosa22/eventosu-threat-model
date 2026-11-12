@@ -44,5 +44,5 @@ eventosu-threat-model/
 | 2. DFD en Threat Dragon | Hecho (faltan las capturas en el informe) |
 | 3. Identificación con STRIDE | Hecho: 23 amenazas |
 | 4. Árbol de ataque | Hecho |
-| 5. Priorización | Pendiente |
-| 6. Respuesta y trazabilidad | Pendiente |
+| 5. Priorización | Hecho |
+| 6. Respuesta y trazabilidad | Hecho |
