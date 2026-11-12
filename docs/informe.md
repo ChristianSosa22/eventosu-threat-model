@@ -80,86 +80,19 @@ El caso no define estos puntos. Se usan de forma consistente en el DFD, las amen
 
 ## 3. DFD nivel 0 y nivel 1
 
-El modelo está en [`model/eventosu.json`](../model/eventosu.json) y contiene dos diagramas. Las figuras de esta sección son una representación equivalente en Mermaid; **se sustituyen por las capturas de Threat Dragon antes de exportar a PDF**.
+El modelo está en [`model/eventosu.json`](../model/eventosu.json) y contiene dos diagramas. Las figuras de esta sección son capturas de OWASP Threat Dragon.
 
 ### 3.1 Nivel 0: contexto
 
-```mermaid
-flowchart LR
-    V[Visitante]
-    E[Estudiante o público]
-    O[Organizador]
-    P[Personal de Puerta]
-    AD[Administrador]
-    subgraph LC[Límite: sistema EventosU]
-        S((EventosU))
-    end
-    subgraph T[Límite: servicios de terceros]
-        EN[Microsoft Entra ID]
-        PG[Pasarela de pagos]
-        C[Servicio de correo]
-    end
-    V <-->|"Catálogo de eventos (HTTPS, JSON)"| S
-    E <-->|"Registro, inscripción y entrada QR (HTTPS, JSON)"| S
-    O <-->|"Eventos, afiches y CSV de inscritos (HTTPS, JSON y archivos)"| S
-    P <-->|"Validación de QR (HTTPS, JSON)"| S
-    AD <-->|"Usuarios, roles y reportes (HTTPS, JSON)"| S
-    S <-->|"Autenticación institucional (HTTPS, OAuth 2.0)"| EN
-    S -->|"Orden de pago (HTTPS, JSON)"| PG
-    PG -->|"Webhook de pago (HTTPS, JSON)"| S
-    S -->|"Entrada QR y restablecimiento (HTTPS, JSON)"| C
-    C -->|"Correo con QR o enlace (SMTP/TLS, MIME)"| E
-```
+EventosU como un solo proceso, sus cinco tipos de usuario y los tres servicios de terceros.
+
+![DFD nivel 0: contexto de EventosU](../assets/Nivel%200%20-%20Contexto.png)
 
 ### 3.2 Nivel 1: componentes
 
-```mermaid
-flowchart LR
-    V[Visitante]
-    E[Estudiante o público]
-    O[Organizador]
-    AD[Administrador]
-    P[Personal de Puerta]
-    subgraph LC1[LC1 Navegador del usuario]
-        W((Sitio web React))
-        ADM((Panel /admin))
-    end
-    subgraph LC2[LC2 Dispositivo móvil de puerta]
-        APP((App de Puerta))
-    end
-    subgraph LC3[LC3 Nube EventosU]
-        API((API Node.js))
-    end
-    subgraph LC4[LC4 Zona de datos]
-        DB[(PostgreSQL)]
-        B[(Bucket de objetos)]
-        L[(Logs de auditoría)]
-    end
-    subgraph LC5[LC5 Servicios de terceros]
-        EN[Microsoft Entra ID]
-        PG[Pasarela de pagos]
-        C[Servicio de correo]
-    end
-    V -->|F01| W
-    E -->|F02| W
-    O -->|F03| W
-    AD -->|F04| ADM
-    P -->|F05| APP
-    W <-->|F06| API
-    ADM <-->|F07| API
-    APP <-->|F08| API
-    W <-->|F09| EN
-    API <-->|F10| EN
-    API -->|F11| PG
-    W -->|F12| PG
-    PG -->|F13| API
-    API -->|F14| C
-    C -->|F15| E
-    API <-->|F16| DB
-    API -->|F17| B
-    B -->|F18| W
-    API -->|F19| L
-```
+Todos los componentes del caso con sus cinco límites de confianza (LC1 a LC5). Los elementos en rojo tienen amenazas abiertas. El detalle de cada flujo está en la sección 3.3.
+
+![DFD nivel 1: componentes de EventosU](../assets/Nivel%201%20-%20Componentes.png)
 
 ### 3.3 Flujos de datos del nivel 1
 

@@ -23,6 +23,7 @@ El detalle, los activos y los supuestos están en la sección 2 del [informe](do
 eventosu-threat-model/
 ├── README.md             # integrantes, alcance y cómo abrir el modelo
 ├── model/eventosu.json   # modelo de Threat Dragon (DFD nivel 0 y nivel 1, 23 amenazas)
+├── assets/               # capturas de los diagramas de Threat Dragon
 ├── docs/informe.md       # informe en borrador; se exporta a docs/informe.pdf al finalizar
 └── docs/amenazas.csv     # tabla de amenazas
 ```
@@ -41,7 +42,7 @@ eventosu-threat-model/
 | Actividad | Estado |
 |---|---|
 | 1. Alcance y activos | Hecho |
-| 2. DFD en Threat Dragon | Hecho (faltan las capturas en el informe) |
+| 2. DFD en Threat Dragon | Hecho |
 | 3. Identificación con STRIDE | Hecho: 23 amenazas |
 | 4. Árbol de ataque | Hecho |
 | 5. Priorización | Hecho |
